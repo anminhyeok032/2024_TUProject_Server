@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <array>
+#include <thread>
+#include <vector>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 
@@ -10,5 +12,10 @@
 
 constexpr short PORT = 4000;
 constexpr int BUFSIZE = 256;
+constexpr int MAX_USER = 4;
 
 enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
+enum class S_STATE {ST_FREE, ST_ALLOC, ST_INGAME};
+
+std::array<SESSION, MAX_USER> clients;
+HANDLE g_hiocp;

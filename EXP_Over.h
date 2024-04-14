@@ -2,12 +2,14 @@
 #include "global.h"
 #include "protocol.h"
 
+// TODO : comp_type을 factory화 시키기
 class OVER_EXP {
 public:
 	WSAOVERLAPPED _over;
 	WSABUF _wsabuf;
 	char _send_buf[BUF_SIZE];
 	COMP_TYPE _comp_type;
+	SOCKET _client_socket;
 	OVER_EXP()
 	{
 		_wsabuf.len = BUF_SIZE;
@@ -24,3 +26,4 @@ public:
 		memcpy(_send_buf, packet, packet[0]);
 	}
 };
+
