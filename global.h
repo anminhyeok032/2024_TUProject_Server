@@ -7,6 +7,7 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 
+
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 
@@ -16,6 +17,3 @@ constexpr int MAX_USER = 4;
 
 enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum class S_STATE {ST_FREE, ST_ALLOC, ST_INGAME};
-
-std::array<SESSION, MAX_USER> clients;
-HANDLE g_hiocp;

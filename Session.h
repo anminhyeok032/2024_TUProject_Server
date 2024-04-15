@@ -16,7 +16,7 @@ public:
 	// 잘린 조각을 고려하기 위한 previous remaining 변수
 	int		_prev_remain;
 public:
-	SESSION() : _socket(0), in_use(false)
+	SESSION() : _socket(0), in_use(S_STATE::ST_FREE)
 	{
 		_id = -1;
 		x = y = 0;
@@ -34,3 +34,6 @@ public:
 
 	void send_move_packet(int c_id);
 };
+
+
+extern std::array<SESSION, MAX_USER> clients;

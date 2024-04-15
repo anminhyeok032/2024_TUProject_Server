@@ -9,16 +9,23 @@ constexpr int W_WIDTH = 8;
 constexpr int W_HEIGHT = 8;
 
 // Packet ID
+// Client -> Server
 constexpr char CS_LOGIN = 0;
-constexpr char CS_MOUSE_PACKET = 1;
-constexpr char CS_KEYINPUT_PACKET = 2;
+constexpr char CS_MOUSE = 1;
+constexpr char CS_KEYINPUT = 2;
 
+// Server -> Client
 constexpr char SC_LOGIN_INFO = 11;
 constexpr char SC_ADD_PLAYER = 12;
 constexpr char SC_REMOVE_PLAYER = 13;
 constexpr char SC_MOVE_PLAYER = 14;
 
 #pragma pack (push, 1)
+
+///////////////////////////////////////////////
+// Client -> Server
+///////////////////////////////////////////////
+
 // 로그인시 패킷
 struct CS_LOGIN_PACKET {
 	unsigned char size;
@@ -32,17 +39,20 @@ struct CS_LOGIN_PACKET {
 // 이동 및 스킬 사용 키인풋 패킷
 struct CS_MOUSE_PACKET {
 	unsigned char size;
-	char	type;       // Mouse Input 
+	char	type;       
 	float	Rotation;		// 마우스 방향에 따른 캐릭터가 바라보는 방향 
 };
 
 // 이동 및 스킬 사용 키인풋 패킷
 struct CS_KEYINPUT_PACKET {
 	unsigned char size;
-	char	type;       // Skill or Move
+	char	type;       
 	char	direction;  // 0 : UP, 1 : DOWN, 2 : LEFT, 3 : RIGHT, 4~ SKILL
 };
 
+///////////////////////////////////////////////
+// Server -> Client
+///////////////////////////////////////////////
 
 // 클라이언트 개인 서버에 접속한 플레이어 정보
 struct SC_LOGIN_INFO_PACKET {
