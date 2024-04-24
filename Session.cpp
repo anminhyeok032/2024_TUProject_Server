@@ -1,5 +1,18 @@
 #include "Session.h"
 
+void print_error(const char* msg, int err_no)
+{
+	WCHAR* msg_buf;
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL, err_no,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPWSTR>(&msg_buf), 0, NULL);
+	std::cout << msg;
+	std::wcout << L" : ¿¡·¯ : " << msg_buf;
+	while (true);
+	LocalFree(msg_buf);
+}
+
 void SESSION::do_recv()
 {
 	DWORD recv_flag = 0;
@@ -15,7 +28,11 @@ void SESSION::do_recv()
 void SESSION::do_send(void* packet)
 {
 	OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<unsigned char*>(packet) };
-	WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, 0);
+	int res = WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, 0);
+	if (res != 0)
+	{
+		print_error("do_send", WSAGetLastError());
+	}
 }
 
 void SESSION::send_login_info_packet()
@@ -28,6 +45,18 @@ void SESSION::send_login_info_packet()
 	p.x = x;
 	p.y = y;
 	do_send(&p);
+}
+
+void SESSION::send_add_player_packet(int c_id)
+{
+	SC_ADD_PLAYER_PACKET add_packet;
+	add_packet.id = c_id;
+	strcpy_s(add_packet.nickname, clients[c_id]._name);
+	add_packet.size = sizeof(add_packet);
+	add_packet.type = SC_ADD_PLAYER;
+	add_packet.x = clients[c_id].x;
+	add_packet.y = clients[c_id].y;
+	do_send(&add_packet);
 }
 
 void SESSION::send_move_packet(int c_id)

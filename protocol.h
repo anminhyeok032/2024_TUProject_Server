@@ -8,6 +8,8 @@ constexpr int PASSWORD_SIZE = 25;
 constexpr int W_WIDTH = 8;
 constexpr int W_HEIGHT = 8;
 
+#define MAXUSER = 4;
+
 // Packet ID
 // Client -> Server
 constexpr char CS_LOGIN = 0;

@@ -6,6 +6,7 @@
 #include <vector>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
+#include "protocol.h"
 
 
 #pragma comment(lib, "WS2_32.lib")

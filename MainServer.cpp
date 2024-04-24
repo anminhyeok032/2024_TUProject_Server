@@ -7,10 +7,13 @@
 // 서버를 따로 둔 Dedicated Server 형태로 작성
 // 멀티코어를 이용한 구현
 
+
+
+// Global variables
 std::array<SESSION, MAX_USER> clients;
 HANDLE g_hiocp;
 
-int get_new_client_id()
+int GetNewClientId()
 {
 	for (int i = 0; i < MAX_USER; ++i)
 	{
@@ -22,47 +25,29 @@ int get_new_client_id()
 	return -1;
 }
 
-void process_packet(int c_id, char* packet)
+void ProcessPacket(int c_id, char* packet)
 {
 	switch (packet[1]) 
 	{
 	case CS_LOGIN: 
 	{
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
-
-		// lock을 해줘야 함
 		strcpy_s(clients[c_id]._name, p->name);
+
 		clients[c_id].in_use = S_STATE::ST_INGAME;
 		clients[c_id].send_login_info_packet();
+		std::cout << clients[c_id]._name << " login " << std::endl;
 
-		for (auto& pl : clients) 
+		for (auto& player : clients) 
 		{
-			if (S_STATE::ST_INGAME != pl.in_use) continue;
-			if (pl._id == c_id) continue;
-			SC_ADD_PLAYER_PACKET add_packet;
-			add_packet.id = c_id;
-			strcpy_s(add_packet.nickname, p->name);
-			add_packet.size = sizeof(add_packet);
-			add_packet.type = SC_ADD_PLAYER;
-			add_packet.x = clients[c_id].x;
-			add_packet.y = clients[c_id].y;
-
-			pl.do_send(&add_packet);
+			if (S_STATE::ST_INGAME != player.in_use) continue;
+			if (player._id == c_id) continue;
+			
+			player.send_add_player_packet(c_id);
+			clients[c_id].send_add_player_packet(player._id);
 		}
-		//상대방에게 내가 보이게 broadcast
-		for (auto& pl : clients) 
-		{
-			if (S_STATE::ST_INGAME != pl.in_use) continue;
-			if (pl._id == c_id) continue;
-			SC_ADD_PLAYER_PACKET add_packet;
-			add_packet.id = pl._id;
-			strcpy_s(add_packet.nickname, pl._name);
-			add_packet.size = sizeof(add_packet);
-			add_packet.type = SC_ADD_PLAYER;
-			add_packet.x = pl.x;
-			add_packet.y = pl.y;
-			clients[c_id].do_send(&add_packet);
-		}
+		
+		
 		break;
 	}
 	case CS_KEYINPUT:
@@ -70,16 +55,15 @@ void process_packet(int c_id, char* packet)
 		CS_KEYINPUT_PACKET* p = reinterpret_cast<CS_KEYINPUT_PACKET*>(packet);
 		short x = clients[c_id].x;
 		short y = clients[c_id].y;
+		short z = clients[c_id].z;
 		switch (p->direction) 
 		{
-		case 0: if (y > 0) y--; break;
-		case 1: if (y < W_HEIGHT - 1) y++; break;
-		case 2: if (x > 0) x--; break;
-		case 3: if (x < W_WIDTH - 1) x++; break;
+			// TODO: 움직임 계산
 		}
 
 		clients[c_id].x = x;
 		clients[c_id].y = y;
+		clients[c_id].z = z;
 
 		for (auto& pl : clients)
 		{
@@ -151,7 +135,7 @@ void worker(SOCKET server)
 			// 전체를 락 걸어야 하지만, 하나의 오버랩을 이용하고 기존 accept가 끝나야 다시 돌기때문에 락을 걸지 않음
 
 			// 현재 STATE가 FREE인 것을 찾아서 할당함
-			int client_id = get_new_client_id();
+			int client_id = GetNewClientId();
 			SOCKET c_socket = ex_over->_client_socket;
 			if (client_id != -1) 
 			{
@@ -165,11 +149,10 @@ void worker(SOCKET server)
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket),
 					g_hiocp, client_id, 0);
 				clients[client_id].do_recv();
+				
 			}
 			else 
 			{
-				// 동접이 FULL일때 대기표 구현은 알아서 할것
-				// TODO : 여기서 GetQueuedCompletionStatus 를 Infinite로 설정해서 불러오면 대기표의 형태로 사용해보자
 				std::cout << "Max user exceeded.\n";
 				closesocket(c_socket);
 			}
@@ -189,7 +172,7 @@ void worker(SOCKET server)
 				int packet_size = p[0];
 				if (packet_size <= remain_data) 
 				{
-					process_packet(static_cast<int>(key), p);
+					ProcessPacket(static_cast<int>(key), p);
 					p = p + packet_size;
 					remain_data = remain_data - packet_size;
 				}
