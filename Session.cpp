@@ -44,6 +44,7 @@ void SESSION::send_login_info_packet()
 	p.type = SC_LOGIN_INFO;
 	p.x = x;
 	p.y = y;
+	p.z = z;
 	do_send(&p);
 }
 
@@ -56,17 +57,25 @@ void SESSION::send_add_player_packet(int c_id)
 	add_packet.type = SC_ADD_PLAYER;
 	add_packet.x = clients[c_id].x;
 	add_packet.y = clients[c_id].y;
+	add_packet.z = clients[c_id].z;
 	do_send(&add_packet);
 }
 
 void SESSION::send_move_packet(int c_id)
 {
-	// TODO : 움직임 패킷 전송 z 축도 고려해야함
 	SC_MOVE_PLAYER_PACKET p;
 	p.id = c_id;
 	p.size = sizeof(SC_MOVE_PLAYER_PACKET);
 	p.type = SC_MOVE_PLAYER;
 	p.x = clients[c_id].x;
 	p.y = clients[c_id].y;
+	p.z = clients[c_id].z;
+	p.yaw = clients[c_id].player.GetYaw();
+	p.pitch = clients[c_id].player.GetPitch();
+	p.roll = clients[c_id].player.GetRoll();
+
+	//std::cout << "[" << c_id << "]'s position : x = " << clients[c_id].x << ", y = " << clients[c_id].y << ", z = " << clients[c_id].z << std::endl;
+	//std::cout << "[" << c_id << "]'s look : yaw = " << p.yaw << ", pitch = " << p.pitch << ", roll = " << p.roll << std::endl;
+
 	do_send(&p);
 }

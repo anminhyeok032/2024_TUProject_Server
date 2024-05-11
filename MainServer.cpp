@@ -3,6 +3,7 @@
 #include "Session.h"
 #include "EXP_Over.h"
 
+
 // 현재 월드 서버 구현중
 // 서버를 따로 둔 Dedicated Server 형태로 작성
 // 멀티코어를 이용한 구현
@@ -12,6 +13,9 @@
 // Global variables
 std::array<SESSION, MAX_USER> clients;
 HANDLE g_hiocp;
+
+// ElapsedTime 계산을 위한 변수
+auto lastUpdateTime = std::chrono::high_resolution_clock::now();
 
 int GetNewClientId()
 {
@@ -27,6 +31,13 @@ int GetNewClientId()
 
 void ProcessPacket(int c_id, char* packet)
 {
+	// ElapsedTime
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float elapsed_time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastUpdateTime).count();
+	float elapsed_time_insec = elapsed_time;
+	if (elapsed_time_insec > 0.1f)	elapsed_time_insec = 0.1f;
+	lastUpdateTime = currentTime;
+
 	switch (packet[1]) 
 	{
 	case CS_LOGIN: 
@@ -37,6 +48,7 @@ void ProcessPacket(int c_id, char* packet)
 		clients[c_id].in_use = S_STATE::ST_INGAME;
 		clients[c_id].send_login_info_packet();
 		std::cout << clients[c_id]._name << " login " << std::endl;
+		std::cout << "[" << c_id << "]'s Coord : x = " << clients[c_id].x << ", y = " << clients[c_id].y << ", z = " << clients[c_id].z << std::endl;
 
 		for (auto& player : clients) 
 		{
@@ -46,25 +58,26 @@ void ProcessPacket(int c_id, char* packet)
 			player.send_add_player_packet(c_id);
 			clients[c_id].send_add_player_packet(player._id);
 		}
-		
+		 
 		
 		break;
 	}
-	case CS_KEYINPUT:
+	case CS_MOVE:
 	{
-		CS_KEYINPUT_PACKET* p = reinterpret_cast<CS_KEYINPUT_PACKET*>(packet);
-		short x = clients[c_id].x;
-		short y = clients[c_id].y;
-		short z = clients[c_id].z;
-		switch (p->direction) 
-		{
-			// TODO: 움직임 계산
-		}
+		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
-		clients[c_id].x = x;
-		clients[c_id].y = y;
-		clients[c_id].z = z;
+		clients[c_id].player.InputActionMove(p->direction, p->yaw);
+		
+		XMFLOAT3 newPosition = clients[c_id].player.Update(elapsed_time_insec, XMFLOAT3(clients[c_id].x, clients[c_id].y, clients[c_id].z));
+		clients[c_id].player.OrientRotationToMove(elapsed_time_insec);
+		clients[c_id].player.UpdateRotate(elapsed_time_insec);
 
+		clients[c_id].x = newPosition.x;
+		clients[c_id].y = newPosition.y;
+		clients[c_id].z = newPosition.z;
+		
+		
+		
 		for (auto& pl : clients)
 		{
 			if (S_STATE::ST_INGAME == pl.in_use)
@@ -72,6 +85,7 @@ void ProcessPacket(int c_id, char* packet)
 				pl.send_move_packet(c_id);
 			}
 		}
+
 		break;
 	}
 	}
@@ -140,12 +154,14 @@ void worker(SOCKET server)
 			if (client_id != -1) 
 			{
 				clients[client_id].in_use = S_STATE::ST_ALLOC;
-				clients[client_id].x = 0;
-				clients[client_id].y = 0;
+				clients[client_id].x = 100;
+				clients[client_id].y = 500;
+				clients[client_id].z = 100;
 				clients[client_id]._id = client_id;
 				clients[client_id]._name[0] = 0;
 				clients[client_id]._prev_remain = 0;
 				clients[client_id]._socket = c_socket;
+				clients[client_id].player.SetPlayerId(client_id);
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket),
 					g_hiocp, client_id, 0);
 				clients[client_id].do_recv();
@@ -217,6 +233,7 @@ int main()
 	OVER_EXP a_over;
 	a_over._comp_type = OP_ACCEPT;
 	a_over._client_socket = c_socket;
+
 
 	// 시작할 때 AcceptEx 를 걸어줌
 	AcceptEx(server, c_socket, a_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over._over);
