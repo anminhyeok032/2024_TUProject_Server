@@ -2,7 +2,7 @@
 #include "protocol.h"
 #include "Session.h"
 #include "EXP_Over.h"
-
+#include "db.h"
 
 // 현재 월드 서버 구현중
 // 서버를 따로 둔 Dedicated Server 형태로 작성
@@ -65,12 +65,13 @@ void ProcessPacket(int c_id, char* packet)
 	case CS_MOVE:
 	{
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
+		clients[c_id].player.SetYaw(p->player_yaw);
 
-		clients[c_id].player.InputActionMove(p->direction, p->yaw);
+		clients[c_id].player.InputActionMove(p->direction, p->camera_yaw);
 		
 		XMFLOAT3 newPosition = clients[c_id].player.Update(elapsed_time_insec, XMFLOAT3(clients[c_id].x, clients[c_id].y, clients[c_id].z));
-		clients[c_id].player.OrientRotationToMove(elapsed_time_insec);
 		clients[c_id].player.UpdateRotate(elapsed_time_insec);
+		clients[c_id].player.OrientRotationToMove(elapsed_time_insec);
 
 		clients[c_id].x = newPosition.x;
 		clients[c_id].y = newPosition.y;
@@ -85,7 +86,8 @@ void ProcessPacket(int c_id, char* packet)
 				pl.send_move_packet(c_id);
 			}
 		}
-
+		clients[c_id].player.SetYaw(0.0f);
+		clients[c_id].player.SetDirectionVector(XMFLOAT3(0.f, 0.f, 0.f));
 		break;
 	}
 	}
@@ -162,6 +164,7 @@ void worker(SOCKET server)
 				clients[client_id]._prev_remain = 0;
 				clients[client_id]._socket = c_socket;
 				clients[client_id].player.SetPlayerId(client_id);
+				clients[client_id].player.SetLook(0, 0, 1.0f);
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket),
 					g_hiocp, client_id, 0);
 				clients[client_id].do_recv();
@@ -233,6 +236,20 @@ int main()
 	OVER_EXP a_over;
 	a_over._comp_type = OP_ACCEPT;
 	a_over._client_socket = c_socket;
+
+
+	// TODO: 데이터 베이스 연결 문제 해결 필요
+	//// 데이터 소스 이름, 사용자 ID, 비밀번호를 입력하세요.
+	//const wchar_t* dataSource = L"TUK_DB";
+	//const wchar_t* userID = L"TUK_DB";
+	//const wchar_t* password = L"1234";
+
+	//if (CheckLogin(dataSource, userID, password)) {
+	//	std::wcout << L"Login check successful." << std::endl;
+	//}
+	//else {
+	//	std::wcout << L"Login check failed." << std::endl;
+	//}
 
 
 	// 시작할 때 AcceptEx 를 걸어줌

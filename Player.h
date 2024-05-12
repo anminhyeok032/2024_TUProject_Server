@@ -23,9 +23,9 @@ protected:
 	float           			fFriction_;
 
 	// RotationComponent
-	short						pitch_ = 0.f;
-	short						yaw_ = 0.f;
-	short						roll_ = 0.f;
+	float						pitch_ = 0.f;
+	float						yaw_ = 0.f;
+	float						roll_ = 0.f;
 
 	
 
@@ -44,21 +44,29 @@ protected:
 	float gravity_velocity_ = 0.f;
 
 public:
-	void InputActionMove(const DWORD& dwDirection, short yaw);
+	void InputActionMove(const DWORD& dwDirection, float camera_yaw);
 	XMFLOAT3 Update(const float& elapsed_time, XMFLOAT3& owner);
-	void SetPlayerId(float id) { player_id_ = id; }
 	void Rotate(const float& pitch, const float& yaw, const float& roll);
 	void UpdateRotate(const float& elapsed_time);
-
 	void OrientRotationToMove(float elapsed_time);
 
-	short GetYaw() { return yaw_; }
-	short GetPitch() { return pitch_; }
-	short GetRoll() { return roll_; }
 
-	XMFLOAT3 GetLookVector() const { return(Vector3::Normalize(XMFLOAT3(yaw_, pitch_, roll_))); }
+	void SetPlayerId(float id) { player_id_ = id; }
+	void SetLook(float pitch, float yaw, float roll) { yaw_ = yaw; pitch_ = pitch; roll_ = roll; }
 
-	XMFLOAT3 GetDirectionVector() const { return(velocity_vector_); }
+	float GetYaw() { return yaw_; }
+	float GetPitch() { return pitch_; }
+	float GetRoll() { return roll_; }
+
+	void SetYaw(float yaw) { yaw_ = yaw; }
+	void SetPitch(float pitch) { pitch_ = pitch; }
+	void SetRoll(float roll) { roll_ = roll; }
+
+	XMFLOAT3 GetLookVector() const { return(Vector3::Normalize(XMFLOAT3(pitch_, yaw_, roll_))); }
+	//XMFLOAT3 GetLookVector() const { return(XMFLOAT3(pitch_, yaw_, roll_)); }
+
+	XMFLOAT3 GetDirectionVector() const { return(direction_vector_); }
+	void SetDirectionVector(XMFLOAT3 direction) { direction_vector_ = direction; }
 
 
 };

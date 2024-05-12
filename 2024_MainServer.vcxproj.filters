@@ -19,6 +19,9 @@
     <Filter Include="Object">
       <UniqueIdentifier>{0c8db3b5-679e-41d7-ae5b-d4bcb5de6e71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DB">
+      <UniqueIdentifier>{35e3bfe4-788c-49cd-a263-ef0063f309df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainServer.cpp">
@@ -32,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="Object.cpp">
       <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="db.cpp">
+      <Filter>DB</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="db.h">
+      <Filter>DB</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

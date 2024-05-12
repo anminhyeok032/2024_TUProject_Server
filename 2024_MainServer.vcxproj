@@ -127,12 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="db.cpp" />
     <ClCompile Include="MainServer.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Session.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="db.h" />
     <ClInclude Include="EXP_Over.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="Object.h" />

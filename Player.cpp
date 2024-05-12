@@ -1,13 +1,13 @@
 #include "Player.h"
 
-void ServerPlayer::InputActionMove(const DWORD& dwDirection, short yaw)
+void ServerPlayer::InputActionMove(const DWORD& dwDirection, float camera_yaw)
 {
 	XMFLOAT3 direction_vector = XMFLOAT3(0.f, 0.f, 0.f);
 	if (dwDirection)
 	{
 
 		// 카메라의 yaw 회전만 가져와서 사용
-		XMMATRIX R = XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(yaw), 0.f);
+		XMMATRIX R = XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(camera_yaw), 0.f);
 		XMFLOAT3 look = XMFLOAT3(0.f, 0.f, 1.f), up = XMFLOAT3(0.f, 1.f, 0.f);
 		XMStoreFloat3(&look, XMVector3TransformCoord(XMLoadFloat3(&look), R));
 		XMFLOAT3 right = Vector3::CrossProduct(up, look);
@@ -18,7 +18,6 @@ void ServerPlayer::InputActionMove(const DWORD& dwDirection, short yaw)
 		if (dwDirection & DIR_RIGHT) direction_vector = Vector3::Add(direction_vector, right);
 	}
 	direction_vector_ = direction_vector;
-	yaw_ = yaw;
 }
 
 XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
@@ -98,7 +97,13 @@ void ServerPlayer::UpdateRotate(const float& elapsed_time)
 
 void ServerPlayer::OrientRotationToMove(float elapsed_time)
 {
+	/*XMMATRIX p = XMMatrixIdentity();
+	XMFLOAT4 y = XMFLOAT4(0, 1, 0, 0);
+	p = XMMatrixRotationAxis(XMLoadFloat4(&y), XMConvertToRadians(yaw_));
+	XMFLOAT3 v = Vector3::TransformNormal(p, y);*/
+
 	XMFLOAT3 v = GetLookVector(), d = Vector3::Normalize(direction_vector_), u = XMFLOAT3(0.f, 1.f, 0.f);
+	//XMFLOAT3 d = Vector3::Normalize(direction_vector_), u = XMFLOAT3(0.f, 1.f, 0.f);
 	float result = Vector3::DotProduct(u, Vector3::CrossProduct(d, v));
 
 	float yaw = Vector3::Angle(v, d);
@@ -106,8 +111,10 @@ void ServerPlayer::OrientRotationToMove(float elapsed_time)
 	{
 		yaw *= -1;
 	}
+	//yaw_ = yaw * 12.f * elapsed_time;
 	if (!IsZero(yaw))
 	{
-		Rotate(0.f, yaw * 12.f * elapsed_time, 0.f);
+		yaw_ = yaw * 12.f * elapsed_time;
 	}
+	
 }
