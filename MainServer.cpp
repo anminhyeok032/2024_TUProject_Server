@@ -86,8 +86,8 @@ void ProcessPacket(int c_id, char* packet)
 				pl.send_move_packet(c_id);
 			}
 		}
-		clients[c_id].player.SetYaw(0.0f);
-		clients[c_id].player.SetDirectionVector(XMFLOAT3(0.f, 0.f, 0.f));
+		//clients[c_id].player.SetYaw(0.0f);
+		//clients[c_id].player.SetDirectionVector(XMFLOAT3(0.f, 0.f, 0.f));
 		break;
 	}
 	}
@@ -156,9 +156,9 @@ void worker(SOCKET server)
 			if (client_id != -1) 
 			{
 				clients[client_id].in_use = S_STATE::ST_ALLOC;
-				clients[client_id].x = 100;
+				clients[client_id].x = 10000 / 2;
 				clients[client_id].y = 500;
-				clients[client_id].z = 100;
+				clients[client_id].z = 10000 / 2;
 				clients[client_id]._id = client_id;
 				clients[client_id]._name[0] = 0;
 				clients[client_id]._prev_remain = 0;

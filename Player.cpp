@@ -47,10 +47,8 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 		velocity_vector_ = Vector3::Normalize(velocity_vector_) * max_speed_;
 	XMFLOAT3 xmf3NewPosition = Vector3::Add(owner, velocity_vector_ * elapsed_time);
 	
-	return xmf3NewPosition;
-
-	// 일단 중력 무시
-	//if (owner->is_fall())
+	//// 일단 중력 무시
+	//if (xmf3NewPosition.y > 100)
 	//{
 	//	gravity_velocity_ += gravity_acceleration_ * elapsed_time;
 
@@ -58,10 +56,11 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 	//		gravity_velocity_ = 5300.f;
 	//	xmf3NewPosition = Vector3::Add(xmf3NewPosition, m_cxmf3GravityDirection, gravity_velocity_);
 	//}
+
 	//else
 	//	gravity_velocity_ = 0.f;
 
-	//owner_->set_position_vector(xmf3NewPosition);
+	return xmf3NewPosition;
 
 }
 

@@ -12,7 +12,7 @@ public:
 	int _id;
 	SOCKET _socket;
 	// *주의 움직임 범위가 32'767이상 넘어갈 시 단위 변환 할 것
-	short	x, y, z;
+	int	x, y, z;
 	char	_name[NAME_SIZE];
 	ServerPlayer player;
 
