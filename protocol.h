@@ -51,7 +51,7 @@ struct CS_MOUSE_PACKET {
 struct CS_MOVE_PACKET {
 	unsigned char size;
 	char	type;    
-	unsigned char	direction;  
+	DWORD	direction;  
 	float	camera_yaw, player_yaw;	// rotation을 위해 필요
 };
 

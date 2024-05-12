@@ -68,5 +68,7 @@ public:
 	XMFLOAT3 GetDirectionVector() const { return(direction_vector_); }
 	void SetDirectionVector(XMFLOAT3 direction) { direction_vector_ = direction; }
 
+	XMFLOAT3 GetVelocityVector() const { return(velocity_vector_); }
+	void SetVelocityVector() { (velocity_vector_ = XMFLOAT3(0.f, 0.f, 0.f)); }
 
 };

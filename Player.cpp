@@ -3,6 +3,7 @@
 void ServerPlayer::InputActionMove(const DWORD& dwDirection, float camera_yaw)
 {
 	XMFLOAT3 direction_vector = XMFLOAT3(0.f, 0.f, 0.f);
+	direction_vector_ = XMFLOAT3(0.f, 0.f, 0.f);
 	if (dwDirection)
 	{
 
@@ -30,11 +31,14 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 	direction_vector_ = Vector3::Normalize(direction_vector_);
 
 	// v = v0 + a * t - f * t
+	
 	velocity_vector_ = velocity_vector_ + (direction_vector_ * (acceleration_ * elapsed_time));
 	if (is_friction_)
 	{
 		if (friction_ * elapsed_time > Vector3::Length(velocity_vector_))
+		{
 			velocity_vector_ = XMFLOAT3(0, 0, 0);
+		}
 		else
 		{
 			XMFLOAT3 friction_vector = Vector3::Normalize(velocity_vector_ * -1) * (friction_ * elapsed_time);
@@ -59,6 +63,11 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 
 	//else
 	//	gravity_velocity_ = 0.f;
+
+	if (xmf3NewPosition.x < 50)	xmf3NewPosition.x = 51;
+	if (xmf3NewPosition.x > TERRAIN + 200)	xmf3NewPosition.x = TERRAIN + 199;
+	if (xmf3NewPosition.z < 50)	xmf3NewPosition.z = 51;
+	if (xmf3NewPosition.z > TERRAIN + 200)	xmf3NewPosition.z = TERRAIN + 199;
 
 	return xmf3NewPosition;
 
@@ -88,21 +97,11 @@ void ServerPlayer::UpdateRotate(const float& elapsed_time)
 	pitch_ = xmf3_Look_.x;
 	yaw_ = xmf3_Look_.y;
 	roll_ = xmf3_Look_.z;
-
-	// 해당 값을 주고 받기 위해 각도로 계산
-	/*float yaw = atan2(xmf3_Look_.z, xmf3_Look_.x);
-	float pitch = atan2(xmf3_Look_.y, sqrt(xmf3_Look_.x * xmf3_Look_.x + xmf3_Look_.z * xmf3_Look_.z));*/
 }
 
 void ServerPlayer::OrientRotationToMove(float elapsed_time)
 {
-	/*XMMATRIX p = XMMatrixIdentity();
-	XMFLOAT4 y = XMFLOAT4(0, 1, 0, 0);
-	p = XMMatrixRotationAxis(XMLoadFloat4(&y), XMConvertToRadians(yaw_));
-	XMFLOAT3 v = Vector3::TransformNormal(p, y);*/
-
 	XMFLOAT3 v = GetLookVector(), d = Vector3::Normalize(direction_vector_), u = XMFLOAT3(0.f, 1.f, 0.f);
-	//XMFLOAT3 d = Vector3::Normalize(direction_vector_), u = XMFLOAT3(0.f, 1.f, 0.f);
 	float result = Vector3::DotProduct(u, Vector3::CrossProduct(d, v));
 
 	float yaw = Vector3::Angle(v, d);
@@ -110,7 +109,6 @@ void ServerPlayer::OrientRotationToMove(float elapsed_time)
 	{
 		yaw *= -1;
 	}
-	//yaw_ = yaw * 12.f * elapsed_time;
 	if (!IsZero(yaw))
 	{
 		yaw_ = yaw * 12.f * elapsed_time;

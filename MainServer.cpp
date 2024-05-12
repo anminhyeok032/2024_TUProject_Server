@@ -35,7 +35,7 @@ void ProcessPacket(int c_id, char* packet)
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float elapsed_time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastUpdateTime).count();
 	float elapsed_time_insec = elapsed_time;
-	if (elapsed_time_insec > 0.1f)	elapsed_time_insec = 0.1f;
+	if (elapsed_time_insec > 0.01f)	elapsed_time_insec = 0.01f;
 	lastUpdateTime = currentTime;
 
 	switch (packet[1]) 
@@ -86,8 +86,11 @@ void ProcessPacket(int c_id, char* packet)
 				pl.send_move_packet(c_id);
 			}
 		}
-		//clients[c_id].player.SetYaw(0.0f);
-		//clients[c_id].player.SetDirectionVector(XMFLOAT3(0.f, 0.f, 0.f));
+		if (!IsZeroVector(clients[c_id].player.GetVelocityVector()))
+		{
+			
+		}
+		clients[c_id].player.SetDirectionVector(XMFLOAT3(0, 0, 0));
 		break;
 	}
 	}
@@ -157,7 +160,7 @@ void worker(SOCKET server)
 			{
 				clients[client_id].in_use = S_STATE::ST_ALLOC;
 				clients[client_id].x = 10000 / 2;
-				clients[client_id].y = 500;
+				clients[client_id].y = 0;
 				clients[client_id].z = 10000 / 2;
 				clients[client_id]._id = client_id;
 				clients[client_id]._name[0] = 0;
