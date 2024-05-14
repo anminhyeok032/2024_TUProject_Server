@@ -11,48 +11,50 @@ void ShowSQLError(unsigned int handleType, const SQLHANDLE& handle)
 
 bool CheckLogin(const wchar_t* dataSource, const wchar_t* userID, const wchar_t* password)
 {
-    SQLHENV henv = SQL_NULL_HENV;
-    SQLHDBC hdbc = SQL_NULL_HDBC;
+    SQLHENV henv;
+    SQLHDBC hdbc;
+    SQLHSTMT hstmt;
     SQLRETURN retcode;
 
-    // 환경 핸들 할당
+    SQLCHAR* OutConnStr = (SQLCHAR*)malloc(255);
+    SQLSMALLINT* OutConnStrLen = (SQLSMALLINT*)malloc(255);
+
+    // Allocate environment handle  
     retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
-    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO) {
-        ShowSQLError(SQL_HANDLE_ENV, henv);
-        return false;
-    }
 
-    // ODBC 버전 환경 속성 설정
-    retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0);
-    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO) {
-        ShowSQLError(SQL_HANDLE_ENV, henv);
-        return false;
-    }
-
-    // 연결 핸들 할당
-    retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO) {
-        ShowSQLError(SQL_HANDLE_DBC, hdbc);
-        return false;
-    }
-
-    // 로그인 타임아웃을 5초로 설정
-    SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
-
-    // 데이터 소스에 연결
-    retcode = SQLConnect(hdbc, (SQLWCHAR*)dataSource, SQL_NTS, (SQLWCHAR*)userID, SQL_NTS, (SQLWCHAR*)password, SQL_NTS);
+    // Set the ODBC version environment attribute  
     if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-        std::wcout << L"Successfully connected to database. Data source name: "
-            << dataSource << std::endl;
-        SQLDisconnect(hdbc); // 연결 해제
-        return true;
-    }
-    else {
-        ShowSQLError(SQL_HANDLE_DBC, hdbc);
-        return false;
-    }
+        retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
 
-    // 연결 및 환경 핸들 정리
-    SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
-    SQLFreeHandle(SQL_HANDLE_ENV, henv);
+        // Allocate connection handle  
+        if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+            retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
+
+            // Set login timeout to 5 seconds  
+            if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+                SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
+
+                // Connect to data source  
+                retcode = SQLConnect(hdbc, (SQLWCHAR*)dataSource, SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
+
+                // Allocate statement handle  
+                if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+                    retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+
+                    // Process data  
+                    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+                        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+
+                        std::cout << "SUCCESS\n";
+                        return true;
+                    }
+
+                    SQLDisconnect(hdbc);
+                }
+
+                SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+            }
+        }
+        SQLFreeHandle(SQL_HANDLE_ENV, henv);
+    }
 }

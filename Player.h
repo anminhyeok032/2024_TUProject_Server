@@ -27,6 +27,8 @@ protected:
 	float						yaw_ = 0.f;
 	float						roll_ = 0.f;
 
+	// KeyInput
+	std::unordered_map<char, bool> keyboard_input_;
 	
 
 	// MovementComponent
@@ -34,7 +36,7 @@ protected:
 
 	XMFLOAT3 direction_vector_ = XMFLOAT3(0.f, 0.f, 0.f);
 	float acceleration_ = 2000.f;
-	float friction_ = 3000.f;
+	float friction_ = 8000.f;
 	bool is_friction_ = true;
 
 	XMFLOAT3 velocity_vector_ = XMFLOAT3(0.f, 0.f, 0.f);
@@ -44,7 +46,7 @@ protected:
 	float gravity_velocity_ = 0.f;
 
 public:
-	void InputActionMove(const DWORD& dwDirection, float camera_yaw);
+	void InputActionMove(const uint8_t Direction, float camera_yaw);
 	XMFLOAT3 Update(const float& elapsed_time, XMFLOAT3& owner);
 	void Rotate(const float& pitch, const float& yaw, const float& roll);
 	void UpdateRotate(const float& elapsed_time);

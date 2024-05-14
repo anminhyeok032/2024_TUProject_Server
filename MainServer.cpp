@@ -65,20 +65,24 @@ void ProcessPacket(int c_id, char* packet)
 	case CS_MOVE:
 	{
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-		clients[c_id].player.SetYaw(p->player_yaw);
 
-		clients[c_id].player.InputActionMove(p->direction, p->camera_yaw);
-		
-		XMFLOAT3 newPosition = clients[c_id].player.Update(elapsed_time_insec, XMFLOAT3(clients[c_id].x, clients[c_id].y, clients[c_id].z));
+		clients[c_id].player.SetYaw(p->player_yaw);
+		clients[c_id].player.InputActionMove(p->keyinput, p->camera_yaw);
+
 		clients[c_id].player.UpdateRotate(elapsed_time_insec);
 		clients[c_id].player.OrientRotationToMove(elapsed_time_insec);
+
+		XMFLOAT3 newPosition;
+		/*while (!IsZeroVector(clients[c_id].player.GetDirectionVector()))
+		{*/
+		newPosition = clients[c_id].player.Update(elapsed_time_insec, XMFLOAT3(clients[c_id].x, clients[c_id].y, clients[c_id].z));
+
+			
 
 		clients[c_id].x = newPosition.x;
 		clients[c_id].y = newPosition.y;
 		clients[c_id].z = newPosition.z;
-		
-		
-		
+
 		for (auto& pl : clients)
 		{
 			if (S_STATE::ST_INGAME == pl.in_use)
@@ -86,11 +90,9 @@ void ProcessPacket(int c_id, char* packet)
 				pl.send_move_packet(c_id);
 			}
 		}
-		if (!IsZeroVector(clients[c_id].player.GetVelocityVector()))
-		{
-			
-		}
+		//}
 		clients[c_id].player.SetDirectionVector(XMFLOAT3(0, 0, 0));
+		clients[c_id].player.SetVelocityVector();
 		break;
 	}
 	}
@@ -241,7 +243,7 @@ int main()
 	a_over._client_socket = c_socket;
 
 
-	// TODO: 데이터 베이스 연결 문제 해결 필요
+
 	//// 데이터 소스 이름, 사용자 ID, 비밀번호를 입력하세요.
 	//const wchar_t* dataSource = L"TUK_DB";
 	//const wchar_t* userID = L"TUK_DB";

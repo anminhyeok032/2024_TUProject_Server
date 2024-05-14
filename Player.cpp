@@ -1,22 +1,53 @@
 #include "Player.h"
 
-void ServerPlayer::InputActionMove(const DWORD& dwDirection, float camera_yaw)
+void ServerPlayer::InputActionMove(const uint8_t Direction, float camera_yaw)
 {
-	XMFLOAT3 direction_vector = XMFLOAT3(0.f, 0.f, 0.f);
-	direction_vector_ = XMFLOAT3(0.f, 0.f, 0.f);
-	if (dwDirection)
+	bool is_key_pressed = Direction & 0x01;
+	uint8_t key_stroke = Direction >> 1;
+	char key = static_cast<char>(key_stroke);
+
+	std::cout << "key input : " << key << " = " << is_key_pressed << std::endl;
+
+	// keyboard 업데이트
+	keyboard_input_[key] = is_key_pressed;
+	if (false == is_key_pressed)
 	{
+		is_friction_ = true;
+	}
 
-		// 카메라의 yaw 회전만 가져와서 사용
-		XMMATRIX R = XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(camera_yaw), 0.f);
-		XMFLOAT3 look = XMFLOAT3(0.f, 0.f, 1.f), up = XMFLOAT3(0.f, 1.f, 0.f);
-		XMStoreFloat3(&look, XMVector3TransformCoord(XMLoadFloat3(&look), R));
-		XMFLOAT3 right = Vector3::CrossProduct(up, look);
+	XMFLOAT3 direction_vector = XMFLOAT3(0.f, 0.f, 0.f);
+	// 카메라의 yaw 회전만 가져와서 사용
+	XMMATRIX R = XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(camera_yaw), 0.f);
+	XMFLOAT3 look = XMFLOAT3(0.f, 0.f, 1.f), up = XMFLOAT3(0.f, 1.f, 0.f);
+	XMStoreFloat3(&look, XMVector3TransformCoord(XMLoadFloat3(&look), R));
+	XMFLOAT3 right = Vector3::CrossProduct(up, look);
 
-		if (dwDirection & DIR_FORWARD) direction_vector = Vector3::Add(direction_vector, look);
-		if (dwDirection & DIR_BACKWARD) direction_vector = Vector3::Add(direction_vector, look, -1.f);
-		if (dwDirection & DIR_LEFT) direction_vector = Vector3::Add(direction_vector, right, -1.f);
-		if (dwDirection & DIR_RIGHT) direction_vector = Vector3::Add(direction_vector, right);
+	// Process keyboard input
+	for (const auto& entry : keyboard_input_)
+	{
+		char key_char = entry.first;
+		bool is_pressed = entry.second;
+
+		if (is_pressed)
+		{
+			switch (key_char)
+			{
+			case 'W':
+				direction_vector = Vector3::Add(direction_vector, look);
+				break;
+			case 'A':
+				direction_vector = Vector3::Add(direction_vector, right, -1.f);
+				break;
+			case 'S':
+				direction_vector = Vector3::Add(direction_vector, look, -1.f);
+				break;
+			case 'D':
+				direction_vector = Vector3::Add(direction_vector, right);
+				break;
+			default:
+				break;
+			}
+		}
 	}
 	direction_vector_ = direction_vector;
 }
@@ -24,15 +55,19 @@ void ServerPlayer::InputActionMove(const DWORD& dwDirection, float camera_yaw)
 XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 {
 	if (Vector3::Length(direction_vector_))
+	{
 		is_friction_ = false;
+		
+	}
 	else
+	{
 		is_friction_ = true;
-
+	}
 	direction_vector_ = Vector3::Normalize(direction_vector_);
 
 	// v = v0 + a * t - f * t
-	
-	velocity_vector_ = velocity_vector_ + (direction_vector_ * (acceleration_ * elapsed_time));
+	//XMFLOAT3 velocity_vector_ = Vector3::Normalize(velocity_vector_) + (direction_vector_ * (acceleration_ * elapsed_time));
+	XMFLOAT3 velocity_vector_ = (direction_vector_ * (acceleration_ * elapsed_time));
 	if (is_friction_)
 	{
 		if (friction_ * elapsed_time > Vector3::Length(velocity_vector_))
@@ -46,10 +81,13 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 		}
 	}
 
+	// 최대 속도 넘을시 속도를 조정
 	float speed = Vector3::Length(velocity_vector_);
 	if (speed > max_speed_)
 		velocity_vector_ = Vector3::Normalize(velocity_vector_) * max_speed_;
+
 	XMFLOAT3 xmf3NewPosition = Vector3::Add(owner, velocity_vector_ * elapsed_time);
+	//std::cout << "[" << 0 << "]'s position : x = " << xmf3NewPosition.x << ", y = " << xmf3NewPosition.y << ", z = " << xmf3NewPosition.z << std::endl;
 	
 	//// 일단 중력 무시
 	//if (xmf3NewPosition.y > 100)
@@ -69,6 +107,7 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 	if (xmf3NewPosition.z < 50)	xmf3NewPosition.z = 51;
 	if (xmf3NewPosition.z > TERRAIN + 200)	xmf3NewPosition.z = TERRAIN + 199;
 
+	direction_vector_ = XMFLOAT3(0.f, 0.f, 0.f);
 	return xmf3NewPosition;
 
 }
