@@ -29,6 +29,13 @@ int GetNewClientId()
 	return -1;
 }
 
+//
+void GameCollisionUpdate(const float& elapsed_time)
+{
+	// TODO : 게임의 모든 Collision을 한번에 업데이트 할 함수
+	//			해당 함수는 매 틱마다 지형, npc, 플레이어의 위치를 재설정하여 바뀐 값들에 대해 PQCS로 처리할것
+}
+
 void ProcessPacket(int c_id, char* packet)
 {
 	// ElapsedTime
@@ -58,8 +65,6 @@ void ProcessPacket(int c_id, char* packet)
 			player.send_add_player_packet(c_id);
 			clients[c_id].send_add_player_packet(player._id);
 		}
-		 
-		
 		break;
 	}
 	case CS_MOVE:
@@ -69,14 +74,11 @@ void ProcessPacket(int c_id, char* packet)
 		clients[c_id].player.SetYaw(p->player_yaw);
 		clients[c_id].player.InputActionMove(p->keyinput, p->camera_yaw);
 
-		clients[c_id].player.UpdateRotate(elapsed_time_insec);
-		clients[c_id].player.OrientRotationToMove(elapsed_time_insec);
-
 		XMFLOAT3 newPosition;
-		/*while (!IsZeroVector(clients[c_id].player.GetDirectionVector()))
-		{*/
 		newPosition = clients[c_id].player.Update(elapsed_time_insec, XMFLOAT3(clients[c_id].x, clients[c_id].y, clients[c_id].z));
 
+		clients[c_id].player.UpdateRotate(elapsed_time_insec);
+		clients[c_id].player.OrientRotationToMove(elapsed_time_insec);
 			
 
 		clients[c_id].x = newPosition.x;
@@ -90,9 +92,6 @@ void ProcessPacket(int c_id, char* packet)
 				pl.send_move_packet(c_id);
 			}
 		}
-		//}
-		clients[c_id].player.SetDirectionVector(XMFLOAT3(0, 0, 0));
-		clients[c_id].player.SetVelocityVector();
 		break;
 	}
 	}
@@ -153,9 +152,6 @@ void worker(SOCKET server)
 		{
 		case OP_ACCEPT: 
 		{
-			// 전체를 락 걸어야 하지만, 하나의 오버랩을 이용하고 기존 accept가 끝나야 다시 돌기때문에 락을 걸지 않음
-
-			// 현재 STATE가 FREE인 것을 찾아서 할당함
 			int client_id = GetNewClientId();
 			SOCKET c_socket = ex_over->_client_socket;
 			if (client_id != -1) 
@@ -173,7 +169,6 @@ void worker(SOCKET server)
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket),
 					g_hiocp, client_id, 0);
 				clients[client_id].do_recv();
-				
 			}
 			else 
 			{

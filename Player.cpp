@@ -6,13 +6,16 @@ void ServerPlayer::InputActionMove(const uint8_t Direction, float camera_yaw)
 	uint8_t key_stroke = Direction >> 1;
 	char key = static_cast<char>(key_stroke);
 
-	std::cout << "key input : " << key << " = " << is_key_pressed << std::endl;
+	//std::cout << "key input : " << key << " = " << is_key_pressed << std::endl;
 
 	// keyboard 업데이트
-	keyboard_input_[key] = is_key_pressed;
 	if (false == is_key_pressed)
 	{
-		is_friction_ = true;
+		keyboard_input_.erase(key);
+	}
+	else
+	{
+		keyboard_input_[key] = is_key_pressed;
 	}
 
 	XMFLOAT3 direction_vector = XMFLOAT3(0.f, 0.f, 0.f);
@@ -48,16 +51,22 @@ void ServerPlayer::InputActionMove(const uint8_t Direction, float camera_yaw)
 				break;
 			}
 		}
+
+	}
+
+	
+	if (IsZeroVector(direction_vector))
+	{
+		velocity_vector_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	}
 	direction_vector_ = direction_vector;
 }
 
-XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
+XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, const XMFLOAT3& owner)
 {
 	if (Vector3::Length(direction_vector_))
 	{
 		is_friction_ = false;
-		
 	}
 	else
 	{
@@ -66,8 +75,7 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 	direction_vector_ = Vector3::Normalize(direction_vector_);
 
 	// v = v0 + a * t - f * t
-	//XMFLOAT3 velocity_vector_ = Vector3::Normalize(velocity_vector_) + (direction_vector_ * (acceleration_ * elapsed_time));
-	XMFLOAT3 velocity_vector_ = (direction_vector_ * (acceleration_ * elapsed_time));
+	velocity_vector_ = (velocity_vector_) + (direction_vector_ * (acceleration_ * elapsed_time));
 	if (is_friction_)
 	{
 		if (friction_ * elapsed_time > Vector3::Length(velocity_vector_))
@@ -84,7 +92,9 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 	// 최대 속도 넘을시 속도를 조정
 	float speed = Vector3::Length(velocity_vector_);
 	if (speed > max_speed_)
+	{
 		velocity_vector_ = Vector3::Normalize(velocity_vector_) * max_speed_;
+	}
 
 	XMFLOAT3 xmf3NewPosition = Vector3::Add(owner, velocity_vector_ * elapsed_time);
 	//std::cout << "[" << 0 << "]'s position : x = " << xmf3NewPosition.x << ", y = " << xmf3NewPosition.y << ", z = " << xmf3NewPosition.z << std::endl;
@@ -107,9 +117,7 @@ XMFLOAT3 ServerPlayer::Update(const float& elapsed_time, XMFLOAT3& owner)
 	if (xmf3NewPosition.z < 50)	xmf3NewPosition.z = 51;
 	if (xmf3NewPosition.z > TERRAIN + 200)	xmf3NewPosition.z = TERRAIN + 199;
 
-	direction_vector_ = XMFLOAT3(0.f, 0.f, 0.f);
 	return xmf3NewPosition;
-
 }
 
 void ServerPlayer::Rotate(const float& pitch, const float& yaw, const float& roll)
@@ -141,6 +149,8 @@ void ServerPlayer::UpdateRotate(const float& elapsed_time)
 void ServerPlayer::OrientRotationToMove(float elapsed_time)
 {
 	XMFLOAT3 v = GetLookVector(), d = Vector3::Normalize(direction_vector_), u = XMFLOAT3(0.f, 1.f, 0.f);
+	if (Vector3::Length(direction_vector_) == 0.0f) return;
+
 	float result = Vector3::DotProduct(u, Vector3::CrossProduct(d, v));
 
 	float yaw = Vector3::Angle(v, d);

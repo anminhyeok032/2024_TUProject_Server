@@ -35,8 +35,8 @@ protected:
 	const XMFLOAT3 m_cxmf3GravityDirection = XMFLOAT3(0.f, -1.0f, 0.f);
 
 	XMFLOAT3 direction_vector_ = XMFLOAT3(0.f, 0.f, 0.f);
-	float acceleration_ = 2000.f;
-	float friction_ = 8000.f;
+	float acceleration_ = 8000.f;
+	float friction_ = 3000.f;
 	bool is_friction_ = true;
 
 	XMFLOAT3 velocity_vector_ = XMFLOAT3(0.f, 0.f, 0.f);
@@ -47,22 +47,26 @@ protected:
 
 public:
 	void InputActionMove(const uint8_t Direction, float camera_yaw);
-	XMFLOAT3 Update(const float& elapsed_time, XMFLOAT3& owner);
+	XMFLOAT3 Update(const float& elapsed_time, const XMFLOAT3& owner);
 	void Rotate(const float& pitch, const float& yaw, const float& roll);
 	void UpdateRotate(const float& elapsed_time);
 	void OrientRotationToMove(float elapsed_time);
 
 
-	void SetPlayerId(float id) { player_id_ = id; }
-	void SetLook(float pitch, float yaw, float roll) { yaw_ = yaw; pitch_ = pitch; roll_ = roll; }
-
+	
 	float GetYaw() { return yaw_; }
 	float GetPitch() { return pitch_; }
 	float GetRoll() { return roll_; }
+	bool GetFriction() { return is_friction_; }
 
 	void SetYaw(float yaw) { yaw_ = yaw; }
 	void SetPitch(float pitch) { pitch_ = pitch; }
 	void SetRoll(float roll) { roll_ = roll; }
+
+	void SetFriction(bool is_friction) { is_friction_ = is_friction; }
+	void SetPlayerId(float id) { player_id_ = id; }
+	void SetLook(float pitch, float yaw, float roll) { yaw_ = yaw; pitch_ = pitch; roll_ = roll; }
+
 
 	XMFLOAT3 GetLookVector() const { return(Vector3::Normalize(XMFLOAT3(pitch_, yaw_, roll_))); }
 	//XMFLOAT3 GetLookVector() const { return(XMFLOAT3(pitch_, yaw_, roll_)); }
