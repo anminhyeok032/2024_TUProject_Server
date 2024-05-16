@@ -70,9 +70,7 @@ void SESSION::send_move_packet(int c_id)
 	p.x = clients[c_id].x;
 	p.y = clients[c_id].y;
 	p.z = clients[c_id].z;
-	p.yaw = clients[c_id].player.GetYaw();
-	p.pitch = clients[c_id].player.GetPitch();
-	p.roll = clients[c_id].player.GetRoll();
+	p.yaw = (clients[c_id].player.GetYaw());
 
 	//std::cout << "[" << c_id << "]'s position : x = " << clients[c_id].x << ", y = " << clients[c_id].y << ", z = " << clients[c_id].z << std::endl;
 	//std::cout << "[" << c_id << "]'s look : yaw = " << p.yaw << ", pitch = " << p.pitch << ", roll = " << p.roll << std::endl;

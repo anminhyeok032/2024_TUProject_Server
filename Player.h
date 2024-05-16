@@ -10,7 +10,7 @@ protected:
 	XMFLOAT3					xmf3_Up_;
 	XMFLOAT3					xmf3_Look_;
 
-	float						player_id_;
+	int						player_id_;
 
 	float						speed_; // ¥‹¿ß: m/s
 
@@ -46,7 +46,7 @@ protected:
 	float gravity_velocity_ = 0.f;
 
 public:
-	void InputActionMove(const uint8_t Direction, float camera_yaw);
+	void InputActionMove(const uint8_t Direction, short camera_yaw);
 	XMFLOAT3 Update(const float& elapsed_time, const XMFLOAT3& owner);
 	void Rotate(const float& pitch, const float& yaw, const float& roll);
 	void UpdateRotate(const float& elapsed_time);
@@ -64,7 +64,7 @@ public:
 	void SetRoll(float roll) { roll_ = roll; }
 
 	void SetFriction(bool is_friction) { is_friction_ = is_friction; }
-	void SetPlayerId(float id) { player_id_ = id; }
+	void SetPlayerId(int id) { player_id_ = id; }
 	void SetLook(float pitch, float yaw, float roll) { yaw_ = yaw; pitch_ = pitch; roll_ = roll; }
 
 

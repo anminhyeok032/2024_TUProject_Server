@@ -52,7 +52,7 @@ struct CS_MOVE_PACKET {
 	unsigned char size;
 	char	type;    
 	uint8_t	keyinput;  
-	float	camera_yaw, player_yaw;	// rotation을 위해 필요
+	short	camera_yaw, player_yaw;	// rotation을 위해 필요
 };
 
 ///////////////////////////////////////////////
@@ -64,7 +64,7 @@ struct SC_LOGIN_INFO_PACKET {
 	unsigned char size;
 	char	type;
 	int 	id;
-	int 	x, y, z;
+	float 	x, y, z;
 };
 
 // 클라이언트 개인 서버에 접속한 플레이어 정보
@@ -72,7 +72,7 @@ struct SC_ADD_PLAYER_PACKET {
 	unsigned char size;
 	char	type;
 	int 	id;
-	int 	x, y, z;
+	float 	x, y, z;
 	char	nickname[NAME_SIZE];
 };
 
@@ -87,8 +87,8 @@ struct SC_MOVE_PLAYER_PACKET {
 	unsigned char size;
 	char	type;		
 	int		id;				// 서버에 접속해 있는 캐릭터 번호
-	int 	x, y, z;		// 움직인 위치
-	float		yaw, pitch, roll;	// look vector
+	float 	x, y, z;		// 움직인 위치
+	float	yaw;	// look vector
 };
 
 #pragma pack (pop)

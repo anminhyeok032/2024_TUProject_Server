@@ -1,6 +1,6 @@
 #include "Player.h"
 
-void ServerPlayer::InputActionMove(const uint8_t Direction, float camera_yaw)
+void ServerPlayer::InputActionMove(const uint8_t Direction, short camera_yaw)
 {
 	bool is_key_pressed = Direction & 0x01;
 	uint8_t key_stroke = Direction >> 1;
