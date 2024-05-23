@@ -4,6 +4,7 @@
 #include <array>
 #include <thread>
 #include <vector>
+#include <tchar.h>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include "protocol.h"

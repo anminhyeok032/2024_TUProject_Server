@@ -22,6 +22,9 @@
     <Filter Include="DB">
       <UniqueIdentifier>{35e3bfe4-788c-49cd-a263-ef0063f309df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Terrain">
+      <UniqueIdentifier>{05ace5fd-90ed-4694-8c66-c8b42d566ef8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainServer.cpp">
@@ -38,6 +41,9 @@
     </ClCompile>
     <ClCompile Include="db.cpp">
       <Filter>DB</Filter>
+    </ClCompile>
+    <ClCompile Include="CHeightMap.cpp">
+      <Filter>Terrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="db.h">
       <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="CHeightMap.h">
+      <Filter>Terrain</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

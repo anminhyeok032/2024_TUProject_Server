@@ -28,6 +28,7 @@ void SESSION::do_recv()
 void SESSION::do_send(void* packet)
 {
 	OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<unsigned char*>(packet) };
+	
 	int res = WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, 0);
 	if (res != 0)
 	{

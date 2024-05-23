@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CHeightMap.cpp" />
     <ClCompile Include="db.cpp" />
     <ClCompile Include="MainServer.cpp" />
     <ClCompile Include="Object.cpp" />
@@ -134,6 +135,7 @@
     <ClCompile Include="Session.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CHeightMap.h" />
     <ClInclude Include="db.h" />
     <ClInclude Include="EXP_Over.h" />
     <ClInclude Include="global.h" />

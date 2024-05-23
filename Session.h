@@ -3,6 +3,7 @@
 #include "protocol.h"
 #include "Exp_Over.h"
 #include "Player.h"
+#include "CHeightMap.h"
 
 class SESSION {
 	OVER_EXP _recv_over;
@@ -11,7 +12,6 @@ public:
 	std::atomic<S_STATE> in_use;
 	int _id;
 	SOCKET _socket;
-	// *주의 움직임 범위가 32'767이상 넘어갈 시 단위 변환 할 것
 	float	x, y, z;
 	char	_name[NAME_SIZE];
 	ServerPlayer player;

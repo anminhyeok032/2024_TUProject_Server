@@ -3,11 +3,7 @@
 #include "Session.h"
 #include "EXP_Over.h"
 #include "db.h"
-
-// 현재 월드 서버 구현중
-// 서버를 따로 둔 Dedicated Server 형태로 작성
-// 멀티코어를 이용한 구현
-
+#include "CHeightMap.h"
 
 
 // Global variables
@@ -16,6 +12,20 @@ HANDLE g_hiocp;
 
 // ElapsedTime 계산을 위한 변수
 auto lastUpdateTime = std::chrono::high_resolution_clock::now();
+
+void SetHeight(const float& x, float& y, const float& z)
+{
+	CHeightMap& terrain = CHeightMap::GetInstance();
+	y = terrain.GetHeight(x, z);
+}
+
+void SetHeightXMFloat3(XMFLOAT3& location)
+{
+	CHeightMap& terrain = CHeightMap::GetInstance();
+	location.y = terrain.GetHeight(location.x, location.z);
+}
+
+
 
 int GetNewClientId()
 {
@@ -80,10 +90,12 @@ void ProcessPacket(int c_id, char* packet)
 		clients[c_id].player.UpdateRotate(elapsed_time_insec);
 		clients[c_id].player.OrientRotationToMove(elapsed_time_insec);
 			
-
+		SetHeightXMFloat3(newPosition);
 		clients[c_id].x = newPosition.x;
 		clients[c_id].y = newPosition.y;
 		clients[c_id].z = newPosition.z;
+		
+		
 
 		for (auto& pl : clients)
 		{
@@ -158,8 +170,8 @@ void worker(SOCKET server)
 			{
 				clients[client_id].in_use = S_STATE::ST_ALLOC;
 				clients[client_id].x = 10000 / 2;
-				clients[client_id].y = 0;
 				clients[client_id].z = 10000 / 2;
+				SetHeight(clients[client_id].x, clients[client_id].y, clients[client_id].z);
 				clients[client_id]._id = client_id;
 				clients[client_id]._name[0] = 0;
 				clients[client_id]._prev_remain = 0;
@@ -237,9 +249,13 @@ int main()
 	a_over._comp_type = OP_ACCEPT;
 	a_over._client_socket = c_socket;
 
+	XMFLOAT3 map_scale(10.0f, 1.f, 10.0f);
+	LPCTSTR pFileName = _T("Resource/main_8.raw");
+	int map_width = 1025;
+	int map_height = 1025;
+	CHeightMap::GetInstance().initialize(pFileName, map_width, map_height, map_scale);
 
-
-	//// 데이터 소스 이름, 사용자 ID, 비밀번호를 입력하세요.
+	//// 데이터 베이스 Init
 	//const wchar_t* dataSource = L"TUK_DB";
 	//const wchar_t* userID = L"TUK_DB";
 	//const wchar_t* password = L"1234";
