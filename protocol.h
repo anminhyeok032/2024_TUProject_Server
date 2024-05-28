@@ -13,9 +13,9 @@ constexpr int W_HEIGHT = 8;
 // Packet ID
 // Client -> Server
 constexpr char CS_LOGIN = 0;
-constexpr char CS_MOUSE = 1;
-constexpr char CS_KEYINPUT = 2;
-constexpr char CS_MOVE = 3;
+constexpr char CS_MOVE = 1;
+constexpr char CS_SKILL = 2;
+
 
 // Server -> Client
 constexpr char SC_LOGIN_INFO = 11;
@@ -38,22 +38,23 @@ struct CS_LOGIN_PACKET {
 	char	password[PASSWORD_SIZE];
 };
 
-// TODO: 해당 패킷은 마우스 방향을 돌릴때 캐릭터가 어떻게 움직이는지에 따라 바뀔 예정
-// 이동 및 스킬 사용 키인풋 패킷
-struct CS_MOUSE_PACKET {
+// 현재 무기 및 스킬 키 인풋, 사용 스킬
+struct CS_SKILL_PACKET {
 	unsigned char size;
-	char	type;       
-	float	Rotation;		// 마우스 방향에 따른 캐릭터가 바라보는 방향 
+	char	type;    
+	uint8_t	Weapon_N_Attack;		// 4비트 WeaponType | 4비트 AttackType
+	uint8_t Animation;				// current Animation state
 };
 
 // 이동 및 스킬 사용 키인풋 패킷
-// TODO: 시작시 위치 동기화 먼저 해줘야함
 struct CS_MOVE_PACKET {
 	unsigned char size;
 	char	type;    
 	uint8_t	keyinput;  
 	short	camera_yaw, player_yaw;	// rotation을 위해 필요
 };
+
+
 
 ///////////////////////////////////////////////
 // Server -> Client

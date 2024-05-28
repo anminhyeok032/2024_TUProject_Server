@@ -29,7 +29,9 @@ protected:
 
 	// KeyInput
 	std::unordered_map<char, bool> keyboard_input_;
-	
+
+	// Animation
+	bool AnimatingStatus_ = false;
 
 	// MovementComponent
 	const XMFLOAT3 m_cxmf3GravityDirection = XMFLOAT3(0.f, -1.0f, 0.f);
@@ -58,6 +60,7 @@ public:
 	float GetPitch() { return pitch_; }
 	float GetRoll() { return roll_; }
 	bool GetFriction() { return is_friction_; }
+	bool GetAnimatingStatus() { return AnimatingStatus_; }
 
 	void SetYaw(float yaw) { yaw_ = yaw; }
 	void SetPitch(float pitch) { pitch_ = pitch; }
@@ -67,6 +70,7 @@ public:
 	void SetPlayerId(int id) { player_id_ = id; }
 	void SetLook(float pitch, float yaw, float roll) { yaw_ = yaw; pitch_ = pitch; roll_ = roll; }
 
+	void SetAnimationStatus(bool curr_animation) { AnimatingStatus_ = curr_animation; }
 
 	XMFLOAT3 GetLookVector() const { return(Vector3::Normalize(XMFLOAT3(pitch_, yaw_, roll_))); }
 	//XMFLOAT3 GetLookVector() const { return(XMFLOAT3(pitch_, yaw_, roll_)); }

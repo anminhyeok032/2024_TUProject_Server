@@ -12,12 +12,21 @@ void ServerPlayer::InputActionMove(const uint8_t Direction, short camera_yaw)
 	if (false == is_key_pressed)
 	{
 		keyboard_input_.erase(key);
+		switch (key)
+		{
+		case ' ':
+			AnimatingStatus_ = false;
+			break;
+		default:
+			break;
+		}
 	}
 	else
 	{
 		keyboard_input_[key] = is_key_pressed;
 	}
-
+	
+	XMFLOAT3 animation_vector = XMFLOAT3(0.f, 0.f, 0.f);
 	XMFLOAT3 direction_vector = XMFLOAT3(0.f, 0.f, 0.f);
 	// 카메라의 yaw 회전만 가져와서 사용
 	XMMATRIX R = XMMatrixRotationRollPitchYaw(0.f, XMConvertToRadians(camera_yaw), 0.f);
@@ -35,6 +44,7 @@ void ServerPlayer::InputActionMove(const uint8_t Direction, short camera_yaw)
 		{
 			switch (key_char)
 			{
+			// Movement
 			case 'W':
 				direction_vector = Vector3::Add(direction_vector, look);
 				break;
@@ -47,6 +57,12 @@ void ServerPlayer::InputActionMove(const uint8_t Direction, short camera_yaw)
 			case 'D':
 				direction_vector = Vector3::Add(direction_vector, right);
 				break;
+			// 
+			case ' ':
+				AnimatingStatus_ = true;
+				animation_vector = XMFLOAT3(0.f, 0.f, 0.f);
+				animation_vector = Vector3::Add(animation_vector, xmf3_Look_);
+				break;
 			default:
 				break;
 			}
@@ -54,6 +70,10 @@ void ServerPlayer::InputActionMove(const uint8_t Direction, short camera_yaw)
 
 	}
 
+	if (true == AnimatingStatus_)
+	{
+		direction_vector = animation_vector;
+	}
 	
 	if (IsZeroVector(direction_vector))
 	{

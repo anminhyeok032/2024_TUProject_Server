@@ -24,6 +24,17 @@ constexpr int TERRAIN = 10000;
 enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum class S_STATE {ST_FREE, ST_ALLOC, ST_INGAME};
 
+// Weapon N Skill
+enum class eWeaponType { None = 0, Sword = 1, Sphere = 2 }; typedef int WeaponType;
+// AnimationState
+enum class ePlayerAnimationState {
+	Idle = 0, Roll, Run, Walk,
+	SwordIdle, SwordAttack11, SwordAttack12, SwordAttack13, SwordAttack21, SwordAttack22, SwordAttack23, SwordAttack30, SwordAttack40,
+	SphereIdle, SphereAttack11, SphereAttack12, SphereAttack20, SphereAttack31, SphereAttack32, SphereAttack33, SphereAttack40
+};	typedef int PlayerAnimationState;
+//플레이어 공격 4가지 None 타입은 공격 상태가 아님을 나타냄
+enum class ePlayerAttackType { None = 0, LeftAttack, RightAttack, BothAttack, ControlAttack };
+typedef int PlayerAttackType;
 
 #define DIR_FORWARD				0x01
 #define DIR_BACKWARD			0x02

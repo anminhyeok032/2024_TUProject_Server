@@ -13,6 +13,18 @@ HANDLE g_hiocp;
 // ElapsedTime 계산을 위한 변수
 auto lastUpdateTime = std::chrono::high_resolution_clock::now();
 
+
+uint8_t PackWeaponNAttack(WeaponType a, PlayerAttackType b) {
+	return (static_cast<uint8_t>(a) << 4) | static_cast<uint8_t>(b);
+}
+
+void UnpackWeaponNAttack(uint8_t packed, WeaponType& a, PlayerAttackType& b) {
+	a = static_cast<WeaponType>((packed >> 4) & 0x0F);
+	b = static_cast<PlayerAttackType>(packed & 0x0F);
+}
+
+
+
 void SetHeight(const float& x, float& y, const float& z)
 {
 	CHeightMap& terrain = CHeightMap::GetInstance();
@@ -89,12 +101,11 @@ void ProcessPacket(int c_id, char* packet)
 
 		clients[c_id].player.UpdateRotate(elapsed_time_insec);
 		clients[c_id].player.OrientRotationToMove(elapsed_time_insec);
-			
+
 		SetHeightXMFloat3(newPosition);
 		clients[c_id].x = newPosition.x;
 		clients[c_id].y = newPosition.y;
 		clients[c_id].z = newPosition.z;
-		
 		
 
 		for (auto& pl : clients)
@@ -105,6 +116,42 @@ void ProcessPacket(int c_id, char* packet)
 			}
 		}
 		break;
+	}
+	case CS_SKILL:
+	{
+		CS_SKILL_PACKET* p = reinterpret_cast<CS_SKILL_PACKET*>(packet);
+		WeaponType curr_weapon;
+		PlayerAttackType curr_attack_type;
+		UnpackWeaponNAttack(p->Weapon_N_Attack, curr_weapon, curr_attack_type);
+		PlayerAnimationState  cuur_animation = static_cast<PlayerAnimationState>(p->Animation >> 1);
+		bool playing_Animation = p->Animation & 0x01;
+
+		if (false == clients[c_id].player.GetAnimatingStatus())
+		{
+			clients[c_id].player.SetAnimationStatus(playing_Animation);
+			std::cout << c_id << " : weapon = " << curr_weapon
+				<< " attackType = " << curr_attack_type
+				<< " Anima = " << cuur_animation
+				<< " Playing? : " << playing_Animation
+				<< std::endl;
+			XMFLOAT3 animation_vector = Vector3::Add(animation_vector, clients[c_id].player.GetLookVector());
+			//clients[c_id].player.SetDirectionVector(animation_vector);
+
+			XMFLOAT3 newPosition;
+			newPosition = clients[c_id].player.Update(elapsed_time_insec, XMFLOAT3(clients[c_id].x, clients[c_id].y, clients[c_id].z));
+		}
+		else
+		{
+			if (false == playing_Animation)
+			{
+				clients[c_id].player.SetAnimationStatus(playing_Animation);
+				std::cout << c_id << " : weapon = " << curr_weapon
+					<< " attackType = " << curr_attack_type
+					<< " Anima = " << cuur_animation
+					<< " Playing? : " << playing_Animation
+					<< std::endl;
+			}
+		}
 	}
 	}
 }
