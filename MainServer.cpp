@@ -92,7 +92,6 @@ void ProcessPacket(int c_id, char* packet)
 	case CS_MOVE:
 	{
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-
 		clients[c_id].player.SetYaw(p->player_yaw);
 		clients[c_id].player.InputActionMove(p->keyinput, p->camera_yaw);
 
@@ -126,30 +125,76 @@ void ProcessPacket(int c_id, char* packet)
 		PlayerAnimationState  cuur_animation = static_cast<PlayerAnimationState>(p->Animation >> 1);
 		bool playing_Animation = p->Animation & 0x01;
 
-		if (false == clients[c_id].player.GetAnimatingStatus())
-		{
-			clients[c_id].player.SetAnimationStatus(playing_Animation);
-			std::cout << c_id << " : weapon = " << curr_weapon
-				<< " attackType = " << curr_attack_type
-				<< " Anima = " << cuur_animation
-				<< " Playing? : " << playing_Animation
-				<< std::endl;
-			XMFLOAT3 animation_vector = Vector3::Add(animation_vector, clients[c_id].player.GetLookVector());
-			//clients[c_id].player.SetDirectionVector(animation_vector);
+		clients[c_id].player.SetCurrentAnimation(curr_weapon, curr_attack_type, cuur_animation);
+		// TODO : send_action_packet에 넣을 state들 멤버변수에 넣어줘야 됌
+		
 
-			XMFLOAT3 newPosition;
-			newPosition = clients[c_id].player.Update(elapsed_time_insec, XMFLOAT3(clients[c_id].x, clients[c_id].y, clients[c_id].z));
+		/*std::cout << c_id << " : weapon = " << static_cast<WeaponType>(curr_weapon)
+			<< " attackType = " << curr_attack_type
+			<< " Anima = " << cuur_animation
+			<< " Playing? : " << playing_Animation
+			<< std::endl;*/
+
+		if (false == clients[c_id].player.GetAnimPlaying())	
+		{			
+			// TODO: 소드2번 공격시 움직임 가능하게 해줘야 함
+			if (clients[c_id].player.GetPlayerAnimationState() != 8)
+			{
+				clients[c_id].player.SetAnimationStatus(playing_Animation);
+			}
+			for (auto& pl : clients)
+			{
+				if (S_STATE::ST_INGAME == pl.in_use)
+				{
+					pl.send_action_packet(c_id);
+				}
+			}
 		}
 		else
 		{
+			if (true == playing_Animation)
+			{
+				if (true == clients[c_id].player.SkillMove(elapsed_time_insec))
+				{
+					XMFLOAT3 newPosition;
+					
+					newPosition = clients[c_id].player.UpdateSkillMove(elapsed_time_insec, XMFLOAT3(clients[c_id].x, clients[c_id].y, clients[c_id].z));
+
+					SetHeightXMFloat3(newPosition);
+					clients[c_id].x = newPosition.x;
+					clients[c_id].y = newPosition.y;
+					clients[c_id].z = newPosition.z;
+
+					for (auto& pl : clients)
+					{
+						if (S_STATE::ST_INGAME == pl.in_use)
+						{
+							pl.send_move_packet(c_id);
+						}
+					}
+				}
+			}
 			if (false == playing_Animation)
 			{
 				clients[c_id].player.SetAnimationStatus(playing_Animation);
-				std::cout << c_id << " : weapon = " << curr_weapon
+				/*std::cout << c_id << " : weapon = " << curr_weapon
 					<< " attackType = " << curr_attack_type
 					<< " Anima = " << cuur_animation
 					<< " Playing? : " << playing_Animation
-					<< std::endl;
+					<< std::endl;*/
+
+				// Animation 초기화 루틴
+				clients[c_id].player.SetMaxSpeed(1000.f);
+				clients[c_id].player.ResetAnimTime();
+				clients[c_id].player.SetVelocityVector();
+
+				for (auto& pl : clients)
+				{
+					if (S_STATE::ST_INGAME == pl.in_use)
+					{
+						pl.send_action_packet(c_id);
+					}
+				}
 			}
 		}
 	}
@@ -162,7 +207,7 @@ void disconnect(int c_id)
 	for (auto& pl : clients) 
 	{
 		if (pl.in_use != S_STATE::ST_INGAME) continue;
-		if (pl._id == c_id) continue;
+		//if (pl._id == c_id) continue;
 		SC_REMOVE_PLAYER_PACKET p;
 		p.id = c_id;
 		p.size = sizeof(p);

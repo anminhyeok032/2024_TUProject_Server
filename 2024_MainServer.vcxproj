@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CHeightMap.cpp" />
+    <ClCompile Include="CWeapon.cpp" />
     <ClCompile Include="db.cpp" />
     <ClCompile Include="MainServer.cpp" />
     <ClCompile Include="Object.cpp" />
@@ -136,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CHeightMap.h" />
+    <ClInclude Include="CWeapon.h" />
     <ClInclude Include="db.h" />
     <ClInclude Include="EXP_Over.h" />
     <ClInclude Include="global.h" />

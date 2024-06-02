@@ -30,10 +30,6 @@ void SESSION::do_send(void* packet)
 	OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<unsigned char*>(packet) };
 	
 	int res = WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, 0);
-	if (res != 0)
-	{
-		print_error("do_send", WSAGetLastError());
-	}
 }
 
 void SESSION::send_login_info_packet()
@@ -75,6 +71,22 @@ void SESSION::send_move_packet(int c_id)
 
 	//std::cout << "[" << c_id << "]'s position : x = " << clients[c_id].x << ", y = " << clients[c_id].y << ", z = " << clients[c_id].z << std::endl;
 	//std::cout << "[" << c_id << "]'s look : yaw = " << p.yaw << ", pitch = " << p.pitch << ", roll = " << p.roll << std::endl;
+
+	do_send(&p);
+}
+
+
+void SESSION::send_action_packet(int c_id)
+{
+	SC_SKILL_PACKET p;
+	ServerPlayer pl = clients[c_id].player;
+	p.id = c_id;
+	p.size = sizeof(SC_SKILL_PACKET);
+	p.type = SC_SKILL_PLAYER;
+
+	p.Weapon_N_Attack = (static_cast<uint8_t>(pl.GetPlayerWeapon()) << 4)
+		| static_cast<uint8_t>(pl.GetPlayerAttack());
+	p.Animation = (static_cast<uint8_t>(pl.GetPlayerAnimationState()) << 1) | pl.GetAnimPlaying();
 
 	do_send(&p);
 }

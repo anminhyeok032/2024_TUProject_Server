@@ -45,6 +45,9 @@
     <ClCompile Include="CHeightMap.cpp">
       <Filter>Terrain</Filter>
     </ClCompile>
+    <ClCompile Include="CWeapon.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="global.h">
@@ -70,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="CHeightMap.h">
       <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="CWeapon.h">
+      <Filter>Player</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

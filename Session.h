@@ -38,6 +38,7 @@ public:
 	void send_add_player_packet(int c_id);
 
 	void send_move_packet(int c_id);
+	void send_action_packet(int c_id);
 };
 
 

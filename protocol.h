@@ -22,6 +22,7 @@ constexpr char SC_LOGIN_INFO = 11;
 constexpr char SC_ADD_PLAYER = 12;
 constexpr char SC_REMOVE_PLAYER = 13;
 constexpr char SC_MOVE_PLAYER = 14;
+constexpr char SC_SKILL_PLAYER = 15;
 
 #pragma pack (push, 1)
 
@@ -92,4 +93,12 @@ struct SC_MOVE_PLAYER_PACKET {
 	float	yaw;	// look vector
 };
 
+// 현재 무기 및 스킬 키 인풋, 사용 스킬
+struct SC_SKILL_PACKET {
+	unsigned char size;
+	char	type;
+	int		id;
+	uint8_t	Weapon_N_Attack;		// 4비트 WeaponType | 4비트 AttackType
+	uint8_t Animation;				// current Animation state
+};
 #pragma pack (pop)
